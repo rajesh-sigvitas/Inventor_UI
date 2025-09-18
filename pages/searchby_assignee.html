@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Search by Assignee</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f1f8ff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      animation: fadeInBody 1.2s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h1 {
+      text-align: center;
+      color: #0039a6; /* Paytm blue */
+      animation: textGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes textGlow {
+      from { text-shadow: 0 0 5px #00baf2; }
+      to { text-shadow: 0 0 15px #00baf2; }
+    }
+
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: slideDown 0.8s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #cce0ff;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      transition: box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 10px #00baf2;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      background: #00baf2; /* Paytm Light Blue */
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #008ecc;
+      transform: scale(1.05);
+    }
+
+    .result {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      animation: fadeInTable 1s ease;
+    }
+
+    @keyframes fadeInTable {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #cce0ff;
+      text-align: left;
+    }
+
+    table th {
+      background: #e6f4ff;
+      color: #0039a6;
+    }
+
+    table td {
+      transition: background 0.3s;
+    }
+
+    table tr:hover td {
+      background: #f0f9ff;
+    }
+
+    .message {
+      text-align: center;
+      font-size: 18px;
+      padding: 20px;
+      color: #ff4d4d;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* Buttons */
+    .glitter-btn {
+      background:#00baf2;
+      color:#fff;
+      border:none;
+      padding:12px 28px;
+      border-radius:50px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:16px;
+      position:relative;
+      overflow:hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .home-btn {
+      background:#1565c0;
+    }
+
+    .glitter-btn::before {
+      content: '';
+      position: absolute;
+      top:0; left:-75%;
+      width:50%;
+      height:100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 100%);
+      transform: skewX(-25deg);
+      transition: all 0.5s;
+    }
+
+    .glitter-btn:hover::before {
+      left:125%;
+      transition: all 0.75s;
+    }
+
+    .glitter-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    /* -------- General Container -------- */
+/* Section headers (Patent Information, Assignees, Inventors) */
+h2 {
+  font-size: 22px;
+  margin-top: 30px;
+  margin-bottom: 12px;
+  color: #0039a6;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #0039a6, #00baf2);
+  border-radius: 2px;
+}
+
+/* -------- Tables (Assignee + Inventors) -------- */
+/* -------- Tables (Assignee + Inventors) -------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px; /* bigger than before */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+}
+
+table thead {
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+}
+
+table th {
+  padding: 13px 16px;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+}
+
+table td {
+  padding: 13px 16px;
+  color: #2c3e50; /* softer than pure black */
+  border-bottom: 1px solid #e5eaf0;
+  font-size: 16px;
+}
+
+table tbody tr:nth-child(odd) {
+  background: #f9fbfd;
+}
+
+table tbody tr:hover {
+  background: #eef6fd;
+  transition: 0.3s;
+}
+
+/* Optional: highlight names & orgs */
+/* table td:first-child,
+table td:nth-child(2) {
+  font-weight: 500;
+  color: #1565c0;
+} */
+
+/* -------- Patent Info Special Styling -------- */
+.result table:first-of-type tr td:first-child {
+  font-weight: bold;
+  color: #0039a6;
+}
+
+/* Glow effect for Patent ID and Title */
+.glow-text {
+  font-size: 18px;
+  font-style: italic;
+  font-weight: bold;
+  color: #1565c0;
+  text-shadow: 0 0 6px rgba(0, 186, 242, 0.6);
+  animation: glowTitle 2s ease-in-out infinite alternate;
+}
+
+/* Keyframes for glow animation */
+@keyframes glowTitle {
+  from {
+    text-shadow: 0 0 6px rgba(0, 186, 242, 0.6), 0 0 12px rgba(0, 186, 242, 0.6);
+  }
+  to {
+    text-shadow: 0 0 12px rgba(0, 186, 242, 1), 0 0 24px rgba(0, 186, 242, 0.9);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowTitle {
+  from { text-shadow: 0 0 6px rgba(0, 186, 242, 0.4); }
+  to { text-shadow: 0 0 15px rgba(0, 186, 242, 0.9); }
+}
+/* Center the pagination controls */
+#pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  animation: fadeInUp 1s ease;
+}
+
+/* Style for buttons */
+#pagination-controls button {
+  background: linear-gradient(135deg, #00baf2, #1565c0);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* Hover animation */
+#pagination-controls button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0, 186, 242, 0.6);
+}
+
+/* Active click effect */
+#pagination-controls button:active {
+  transform: scale(0.95);
+}
+
+/* Page info pill styling */
+#pagination-controls .pill {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
+  animation: pulseGlow 2s infinite alternate;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse glow for page info */
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
+  }
+  to {
+    box-shadow: 0 0 16px rgba(0, 186, 242, 0.9);
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+      <!-- Top Navigation Buttons -->
+<div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1200px; margin:0 auto 30px auto; padding:0 20px;">
+
+  <!-- Back Button on far left -->
+  <button onclick="window.location.href='../index.html'" 
+          class="glitter-btn home-btn">
+    <i class="fas fa-home"></i> Home
+  </button>
+
+  <!-- Right Buttons on far right -->
+  <div>
+    <button onclick="window.location.href='searchby_patent.html'" class="glitter-btn">Search Patent Details</button>
+    <button onclick="window.location.href='searchby_inventor.html'" class="glitter-btn">Search by Inventor</button>
+  </div>
+</div>
+    <h1>Search by Assignee</h1>
+
+    <div class="card search-box">
+      
+      <input type="text" id="organization" placeholder="Organization Name" required/>
+      <button class="btn" id="searchBtn">Search</button>
+    </div>
+
+    <div class="card result">
+      <div id="result"></div>
+
+      <!-- 🔹 Pagination controls -->
+      <div id="pagination-controls" class="pager" style="display:none">
+        <button id="prevPage">Prev</button>
+        <span id="pageInfo" class="pill">Page 1</span>
+        <button id="nextPage">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000/";
+    const ENDPOINT = "patents_view/search_by_assignee";
+    const PAGE_SIZE = 20;
+
+    let currentPage = 1;
+    let totalPages = 1;
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      currentPage = 1;
+      doSearch();
+    });
+    document.getElementById("prevPage").addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        doSearch();
+      }
+    });
+    document.getElementById("nextPage").addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        doSearch();
+      }
+    });
+
+    async function doSearch() {
+  
+      const organization  = document.getElementById("organization").value.trim();
+
+      const resEl = document.getElementById("result");
+      const pager = document.getElementById("pagination-controls");
+      const pageInfo = document.getElementById("pageInfo");
+      resEl.innerHTML = '<div class="loader"></div>';
+      pager.style.display = "none";
+
+      const formData = new FormData();
+      if (organization)  formData.append("organization", organization);
+      formData.append("page", String(currentPage));
+      formData.append("size", String(PAGE_SIZE));
+
+      try {
+        const resp = await fetch(`${API_BASE}${ENDPOINT}`, { method: "POST", body: formData });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${await resp.text()}`);
+        const data = await resp.json();
+        console.log("API response:", data);
+
+        const results = data.items || [];
+        if (!results.length) {
+            resEl.innerHTML = `<div class="message">${data.msg || "No data found"}</div>`;
+            pager.style.display = "none";
+            return;
+        }
+
+        totalPages = data.total_page || 1;
+        const totalCount = data.total_count ?? "—";
+        pageInfo.textContent = `Page ${data.page || currentPage} of ${totalPages} • Total Results: ${totalCount}`;
+
+        renderResults(results);
+        pager.style.display = "flex";
+        document.getElementById("prevPage").disabled = currentPage <= 1;
+        document.getElementById("nextPage").disabled = currentPage >= totalPages;
+
+      } catch (err) {
+        console.error(err);
+        resEl.innerHTML = `<div class="message">Error fetching response<br><span class="muted">${escapeHtml(err.message)}</span></div>`;
+      }
+    }
+
+    function renderResults(items) {
+  const resEl = document.getElementById("result");
+  let html = "";
+  items.forEach(a => {
+    const loc = a.location || {};
+
+    // Build the table rows conditionally
+    let rows = "";
+    if (a.first_name || a.last_name) {
+      rows += `<tr><th>First Name</th><td>${safe(a.first_name)}</td></tr>`;
+      rows += `<tr><th>Last Name</th><td>${safe(a.last_name)}</td></tr>`;
+    }
+    rows += `<tr><th>Organization</th><td class =" glow-text">${safe(a.organization)}</td></tr>`;
+    rows += `<tr><th>Assignee Type</th><td>${safe(a.assignee_type)}</td></tr>`;
+    rows += `<tr><th>Location</th><td>${[loc.city, loc.state, loc.country].filter(Boolean).join(", ")}</td></tr>`;
+
+    html += `
+      <div class="row">
+        <h2 class="inv-title">
+          Assignee: ${
+            a.first_name || a.last_name
+              ? `${safe(a.first_name)} ${safe(a.last_name)}`
+              : safe(a.organization)
+          }
+        </h2>
+        <table>${rows}</table>
+    `;
+
+    if (a.patents && a.patents.length > 0) {
+      html += `
+        <h3 class="muted">Patents</h3>
+        <table>
+          <tr>
+            <th>Patent ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Applications</th>
+          </tr>
+      `;
+      a.patents.forEach(p => {
+        const apps = (p.applications || [])
+          .map(app => `
+            <div>
+              <strong>ID:</strong> ${safe(app.application_id)}<br>
+              <strong>Type:</strong> ${safe(app.patent_application_type)}<br>
+              <strong>Filed:</strong> ${safe(app.filing_date)}
+            </div>
+          `).join("<hr>");
+        html += `
+          <tr>
+            <td>${safe(p.patent_id)}</td>
+            <td class="glow-text">${safe(p.patent_title)}</td>
+            <td>${safe(p.patent_type)}</td>
+            <td>${safe(p.patent_date)}</td>
+            <td>${apps}</td>
+          </tr>
+        `;
+      });
+      html += `</table>`;
+    } else {
+      html += `<div class="muted">No patents for this assignee.</div>`;
+    }
+
+    html += `</div>`;
+  });
+  resEl.innerHTML = html;
+}
+
+
+    function safe(v){ return v == null ? "" : String(v); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  </script>
+</body>
+</html>

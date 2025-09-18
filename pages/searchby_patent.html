@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patent Search</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f1f8ff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      animation: fadeInBody 1.2s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h1 {
+      text-align: center;
+      color: #0039a6; /* Paytm blue */
+      animation: textGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes textGlow {
+      from { text-shadow: 0 0 5px #00baf2; }
+      to { text-shadow: 0 0 15px #00baf2; }
+    }
+
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: slideDown 0.8s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #cce0ff;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      transition: box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 10px #00baf2;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      background: #00baf2; /* Paytm Light Blue */
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #008ecc;
+      transform: scale(1.05);
+    }
+
+    .result {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      animation: fadeInTable 1s ease;
+    }
+
+    @keyframes fadeInTable {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #cce0ff;
+      text-align: left;
+    }
+
+    table th {
+      background: #e6f4ff;
+      color: #0039a6;
+    }
+
+    table td {
+      transition: background 0.3s;
+    }
+
+    table tr:hover td {
+      background: #f0f9ff;
+    }
+
+    .message {
+      text-align: center;
+      font-size: 18px;
+      padding: 20px;
+      color: #ff4d4d;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* Buttons */
+    .glitter-btn {
+      background:#00baf2;
+      color:#fff;
+      border:none;
+      padding:12px 28px;
+      border-radius:50px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:16px;
+      position:relative;
+      overflow:hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .home-btn {
+      background:#1565c0;
+    }
+
+    .glitter-btn::before {
+      content: '';
+      position: absolute;
+      top:0; left:-75%;
+      width:50%;
+      height:100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 100%);
+      transform: skewX(-25deg);
+      transition: all 0.5s;
+    }
+
+    .glitter-btn:hover::before {
+      left:125%;
+      transition: all 0.75s;
+    }
+
+    .glitter-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    /* -------- General Container -------- */
+/* Section headers (Patent Information, Assignees, Inventors) */
+h2 {
+  font-size: 22px;
+  margin-top: 30px;
+  margin-bottom: 12px;
+  color: #0039a6;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #0039a6, #00baf2);
+  border-radius: 2px;
+}
+
+/* -------- Tables (Assignee + Inventors) -------- */
+/* -------- Tables (Assignee + Inventors) -------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px; 
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+}
+
+table thead {
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+}
+
+table th {
+  padding: 13px 16px;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+}
+
+table td {
+  padding: 13px 16px;
+  color: #2c3e50; 
+  border-bottom: 1px solid #e5eaf0;
+  font-size: 16px;
+}
+
+table tbody tr:nth-child(odd) {
+  background: #f9fbfd;
+}
+
+table tbody tr:hover {
+  background: #eef6fd;
+  transition: 0.3s;
+}
+
+/* Optional: highlight names & orgs */
+/* table td:first-child,
+table td:nth-child(2) {
+  font-weight: 500;
+  color: #1565c0;
+} */
+
+/* -------- Patent Info Special Styling -------- */
+.result table:first-of-type tr td:first-child {
+  font-weight: bold;
+  color: #0039a6;
+}
+
+.result table:first-of-type tr:nth-child(3) td:last-child {
+  font-size: 18px;
+  font-style: italic;
+  font-weight: bold;
+  color: #1565c0;
+  text-shadow: 0 0 6px rgba(0, 186, 242, 0.6);
+  animation: glowTitle 2s ease-in-out infinite alternate;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowTitle {
+  from { text-shadow: 0 0 6px rgba(0, 186, 242, 0.4); }
+  to { text-shadow: 0 0 15px rgba(0, 186, 242, 0.9); }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Top Navigation Buttons -->
+<div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1200px; margin:0 auto 30px auto; padding:0 20px;">
+
+  <button onclick="window.location.href='../index.html'" class="glitter-btn home-btn">
+    <i class="fas fa-home"></i> Home
+  </button>
+
+  <div>
+    <button onclick="window.location.href='searchby_inventor.html'" class="glitter-btn">Search by Inventor</button>
+    <button onclick="window.location.href='searchby_assignee.html'" class="glitter-btn">Search by Assignee</button>
+  </div>
+</div>
+
+  <h1>Search Patent Details</h1>
+
+  <div class="search-box">
+    <input type="text" id="patentId" placeholder="Enter Patent ID">
+    <button onclick="searchPatent()">Search</button>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    async function searchPatent() {
+      const patentId = document.getElementById("patentId").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      if (!patentId) {
+        resultDiv.innerHTML = "<div class='message'>Please enter a Patent ID</div>";
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append("patent_id", patentId);
+
+        const response = await fetch("http://127.0.0.1:8000/patents_view/search_by_patent", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.status === 0) {
+          resultDiv.innerHTML = `<div class='message'>${data.msg}</div>`;
+          return;
+        }
+
+        // Patent Info
+        let html = `
+          <h2>Patent Information</h2>
+          <table>
+            <tr><th>Patent ID</th><td>${data.patent_data.patent_id}</td></tr>
+            <tr><th>Date</th><td>${data.patent_data.patent_date}</td></tr>
+            <tr><th>Title</th><td>${data.patent_data.patent_title}</td></tr>
+            <tr><th>Type</th><td>${data.patent_data.patent_type}</td></tr>
+          </table>
+        `;
+
+        // Assignee Info (no sequence)
+        if (data.assignees_data.length > 0) {
+          const hasName = data.assignees_data.some(a => a.first_name || a.last_name);
+
+          html += `<h2>Assignees</h2><table><tr>`;
+          if (hasName) {
+            html += `<th>First Name</th><th>Last Name</th>`;
+          }
+          html += `<th>Organization</th><th>City</th><th>State</th><th>Country</th></tr>`;
+
+          data.assignees_data.forEach(a => {
+            html += `<tr>`;
+            if (hasName) {
+              html += `<td>${a.first_name || ""}</td><td>${a.last_name || ""}</td>`;
+            }
+            html += `
+              <td>${a.organization || ""}</td>
+              <td>${a.location?.city || ""}</td>
+              <td>${a.location?.state || ""}</td>
+              <td>${a.location?.country || ""}</td>
+            </tr>`;
+          });
+
+          html += `</table>`;
+        }
+
+        // Inventor Info (no sequence)
+        if (data.inventors_data.length > 0) {
+          const hasName = data.inventors_data.some(inv => inv.first_name || inv.last_name);
+
+          html += `<h2>Inventors</h2><table><tr>`;
+          if (hasName) {
+            html += `<th>First Name</th><th>Last Name</th>`;
+          }
+          html += `<th>City</th><th>State</th><th>Country</th></tr>`;
+
+          data.inventors_data.forEach(inv => {
+            html += `<tr>`;
+            if (hasName) {
+              html += `<td>${inv.first_name || ""}</td><td>${inv.last_name || ""}</td>`;
+            }
+            html += `
+              <td>${inv.location?.city || ""}</td>
+              <td>${inv.location?.state || ""}</td>
+              <td>${inv.location?.country || ""}</td>
+            </tr>`;
+          });
+
+          html += `</table>`;
+        }
+
+        resultDiv.innerHTML = html;
+
+      } catch (err) {
+        resultDiv.innerHTML = "<div class='message'>Error fetching response</div>";
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>
