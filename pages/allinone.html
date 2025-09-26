@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>All-in-One Patent Search</title>
+
+  <style>
+    /* Theme: user-provided colors retained */
+    body { font-family: Arial, sans-serif; background: linear-gradient(135deg,#e3f2fd,#f1f8ff); color:#333; margin:0; padding:20px; animation:fadeInBody 1.2s ease-in-out; }
+    @keyframes fadeInBody { from{opacity:0} to{opacity:1} }
+    h1 { text-align:center; color:#0039a6; animation:textGlow 2s ease-in-out infinite alternate; margin-bottom:14px }
+    @keyframes textGlow { from{text-shadow:0 0 5px #00baf2} to{text-shadow:0 0 15px #00baf2} }
+
+    .search-box { max-width:1100px; margin:0 auto 20px auto; padding:18px; background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); text-align:center }
+    .form-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; align-items:center }
+    input[type="text"] { width:240px; padding:10px; border:1px solid #cce0ff; border-radius:8px; outline:none; font-size:15px }
+    input[type="text"]:focus { box-shadow:0 0 10px #00baf2 }
+    .controls { margin-top:12px }
+    .glitter-btn { background:#00baf2; color:#fff; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:600 }
+    .glitter-btn:hover { background:#008ecc }
+
+    .result { max-width:1100px; margin:20px auto; padding:18px; background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08) }
+    .result-card { border-radius:10px; padding:14px; margin-bottom:16px; background:#fbfdff; border:1px solid #eef6ff }
+    .sub { margin-top:10px; padding:12px; border-radius:8px; background:white; border:1px solid #f1f5f9 }
+
+    table { width:100%; border-collapse:collapse; font-size:15px; margin-top:8px }
+    table thead { background: linear-gradient(90deg,#1976d2,#42a5f5); color:#fff; font-weight:600 }
+    table th, table td { padding:10px 12px; border:1px solid #e5eaf0; text-align:left }
+    table tbody tr:nth-child(odd) { background:#f9fbfd }
+    table tbody tr:hover { background:#eef6fd }
+
+    .glow-text { font-size:18px; font-style:italic; font-weight:bold; color:#1565c0; text-shadow:0 0 6px rgba(0,186,242,0.6) }
+
+    #pagination-controls { display:flex; justify-content:center; gap:12px; margin-top:12px }
+    #pagination-controls button { background: linear-gradient(135deg,#00baf2,#1565c0); color:#fff; border:none; padding:8px 14px; border-radius:20px; cursor:pointer }
+    #pagination-controls .pill { background:#e3f2fd; color:#1565c0; padding:6px 12px; border-radius:16px; font-weight:600 }
+
+    .muted { color:#6b7280; font-size:14px }
+    @media (max-width:900px){ input[type=text]{ width:45% } }
+  body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f1f8ff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      animation: fadeInBody 1.2s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h1 {
+      text-align: center;
+      color: #0039a6; /* Paytm blue */
+      animation: textGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes textGlow {
+      from { text-shadow: 0 0 5px #00baf2; }
+      to { text-shadow: 0 0 15px #00baf2; }
+    }
+
+   
+
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      border: none;
+      background: #00baf2; /* Paytm Light Blue */
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #008ecc;
+      transform: scale(1.05);
+    }
+
+    .result {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      animation: fadeInTable 1s ease;
+    }
+
+    @keyframes fadeInTable {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #cce0ff;
+      text-align: left;
+    }
+
+    table th {
+      background: #e6f4ff;
+      color: #0039a6;
+    }
+
+    table td {
+      transition: background 0.3s;
+    }
+
+    table tr:hover td {
+      background: #f0f9ff;
+    }
+
+    .message {
+      text-align: center;
+      font-size: 18px;
+      padding: 20px;
+      color: #ff4d4d;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* Buttons */
+    .glitter-btn {
+      background:#00baf2;
+      color:#fff;
+      border:none;
+      padding:12px 28px;
+      border-radius:50px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:16px;
+      position:relative;
+      overflow:hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .home-btn {
+      background:#1565c0;
+    }
+
+    .glitter-btn::before {
+      content: '';
+      position: absolute;
+      top:0; left:-75%;
+      width:50%;
+      height:100%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 100%);
+      transform: skewX(-25deg);
+      transition: all 0.5s;
+    }
+
+    .glitter-btn:hover::before {
+      left:125%;
+      transition: all 0.75s;
+    }
+
+    .glitter-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    /* -------- General Container -------- */
+/* Section headers (Patent Information, Assignees, Inventors) */
+h2 {
+  font-size: 22px;
+  margin-top: 30px;
+  margin-bottom: 12px;
+  color: #0039a6;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #0039a6, #00baf2);
+  border-radius: 2px;
+}
+
+/* -------- Tables (Assignee + Inventors) -------- */
+/* -------- Tables (Assignee + Inventors) -------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px; /* bigger than before */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+}
+
+table thead {
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+}
+
+table th {
+  padding: 13px 16px;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+}
+
+table td {
+  padding: 13px 16px;
+  color: #2c3e50; /* softer than pure black */
+  border-bottom: 1px solid #e5eaf0;
+  font-size: 16px;
+}
+
+table tbody tr:nth-child(odd) {
+  background: #f9fbfd;
+}
+
+table tbody tr:hover {
+  background: #eef6fd;
+  transition: 0.3s;
+}
+
+/* Optional: highlight names & orgs */
+/* table td:first-child,
+table td:nth-child(2) {
+  font-weight: 500;
+  color: #1565c0;
+} */
+
+/* -------- Patent Info Special Styling -------- */
+.result table:first-of-type tr td:first-child {
+  font-weight: bold;
+  color: #0039a6;
+}
+
+/* Glow effect for Patent ID and Title */
+.glow-text {
+  font-size: 18px;
+  font-style: italic;
+  font-weight: bold;
+  color: #1565c0;
+  text-shadow: 0 0 6px rgba(0, 186, 242, 0.6);
+  animation: glowTitle 2s ease-in-out infinite alternate;
+}
+
+/* Keyframes for glow animation */
+@keyframes glowTitle {
+  from {
+    text-shadow: 0 0 6px rgba(0, 186, 242, 0.6), 0 0 12px rgba(0, 186, 242, 0.6);
+  }
+  to {
+    text-shadow: 0 0 12px rgba(0, 186, 242, 1), 0 0 24px rgba(0, 186, 242, 0.9);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowTitle {
+  from { text-shadow: 0 0 6px rgba(0, 186, 242, 0.4); }
+  to { text-shadow: 0 0 15px rgba(0, 186, 242, 0.9); }
+}
+/* Center the pagination controls */
+#pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  animation: fadeInUp 1s ease;
+}
+
+/* Style for buttons */
+#pagination-controls button {
+  background: linear-gradient(135deg, #00baf2, #1565c0);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* Hover animation */
+#pagination-controls button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0, 186, 242, 0.6);
+}
+
+/* Active click effect */
+#pagination-controls button:active {
+  transform: scale(0.95);
+}
+
+/* Page info pill styling */
+#pagination-controls .pill {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
+  animation: pulseGlow 2s infinite alternate;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse glow for page info */
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
+  }
+  to {
+    box-shadow: 0 0 16px rgba(0, 186, 242, 0.9);
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+      <!-- Top Navigation Buttons -->
+<div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1200px; margin:0 auto 30px auto; padding:0 20px;">
+
+  <!-- Back Button on far left -->
+  <!-- <button onclick="window.location.href='../index.html'" 
+          class="glitter-btn home-btn">
+          
+    <i class="fas fa-home"></i> Home
+  </button> -->
+
+  <!-- Right Buttons on far right -->
+  <!-- <div>
+    <button onclick="window.location.href='searchby_patent.html'" class="glitter-btn">Search Patent Details</button>
+    <button onclick="window.location.href='searchby_inventor.html'" class="glitter-btn">Search by Inventor</button>
+    <button onclick="window.location.href='searchby_assignee.html'" class="glitter-btn">Search by Assignee</button>
+  </div> -->
+</div>
+  <h1>All-in-One Patent Search</h1>
+
+  <div class="search-box">
+    <form id="searchForm">
+      <div class="form-row">
+        <input id="patent_id" name="patent_id" type="text" placeholder="Patent ID">
+        <input id="first_name" name="first_name" type="text" placeholder="Inventor First Name">
+        <input id="last_name" name="last_name" type="text" placeholder="Inventor Last Name">
+        <input id="organization_name" name="organization_name" type="text" placeholder="Organization Name">
+      </div>
+
+      <div class="controls">
+        <button class="glitter-btn" type="submit">Search</button>
+        <button class="glitter-btn" type="button" id="clearBtn" style="background:#1565c0;margin-left:8px">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="results-root" class="result">
+    <div class="muted">Results will appear here after you run a search</div>
+  </div>
+
+<script>
+  // Endpoint (adjust if different)
+  const ENDPOINT = 'http://127.0.0.1:8000/patents_view/all_in_one_search';
+
+  const form = document.getElementById('searchForm');
+  const resultsRoot = document.getElementById('results-root');
+  const clearBtn = document.getElementById('clearBtn');
+
+  clearBtn.addEventListener('click', () => { form.reset(); resultsRoot.innerHTML = '<div class="muted">Results will appear here after you run a search</div>' });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultsRoot.innerHTML = '<div class="muted">Loading...</div>';
+
+    const fd = new FormData(form);
+    // ensure page exists (server default is 1, but include explicitly for pager)
+    if (!fd.get('page')) fd.set('page','1');
+    const body = new URLSearchParams(fd);
+
+    try {
+      const resp = await fetch(ENDPOINT, { method: 'POST', body });
+      const data = await resp.json();
+      renderResponse(data);
+    } catch (err) {
+      console.error(err);
+      resultsRoot.innerHTML = '<div class="message">Network or server error — check console</div>';
+    }
+  });
+
+  // Render logic: handle single patent response (patent_data + assignees_data + inventors_data)
+  // handle paginated responses (items) and entity lists (items with patents array)
+  function renderResponse(resp){
+    if (!resp) return resultsRoot.innerHTML = '<div class="muted">No data returned</div>';
+    if (resp.status === 0 && resp.msg) return resultsRoot.innerHTML = `<div class="result-card"><div class="muted">${escapeHtml(resp.msg)}</div></div>`;
+
+    // single patent detail
+    if (resp.patent_data) return renderPatentDetail(resp);
+
+    // paginated wrapper — many of your server paginate() responses use `items`
+    const items = Array.isArray(resp.items) ? resp.items : (Array.isArray(resp.patents) ? resp.patents : (Array.isArray(resp.data) ? resp.data : null));
+
+    if (items && items.length) {
+      // decide whether the items represent patents (have patent_id/title) or entities (have patents array)
+      const sample = items[0];
+      if (sample && (sample.patent_id || sample.patent_title)) return renderPatentItems(items, resp);
+      if (sample && Array.isArray(sample.patents)) return renderEntityItems(items, resp);
+
+      // fallback: list of plain records
+      return renderGeneric(items, resp);
+    }
+
+    // fallback: sometimes server returns direct list (not wrapped)
+    if (Array.isArray(resp)) {
+      const s = resp[0];
+      if (s && (s.patent_id || s.patent_title)) return renderPatentItems(resp, {});
+      if (s && Array.isArray(s.patents)) return renderEntityItems(resp, {});
+      return renderGeneric(resp, {});
+    }
+
+    // If server returned a single entity that contains patents
+    if ((resp.first_name || resp.organization_name || resp.organization) && Array.isArray(resp.patents)) {
+      return renderEntityItems([resp], resp);
+    }
+
+    resultsRoot.innerHTML = '<div class="muted">No results to display</div>';
+  }
+
+  function renderPatentDetail(resp){
+    const p = resp.patent_data || {};
+    let html = `<div class="result-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>
+      <div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
+      <div class="muted" style="margin-top:6px">Type: ${escapeHtml(p.patent_type||'')} | Date: ${escapeHtml(p.patent_date||'')}</div>
+    </div></div>`;
+
+    if (Array.isArray(resp.assignees_data) && resp.assignees_data.length) {
+      html += `<h2>Assignees</h2><table><thead><tr><th>Name / Organization</th><th>Location</th></tr></thead><tbody>`;
+      resp.assignees_data.forEach(a => {
+        const name = ((a.first_name||'') + ' ' + (a.last_name||'')).trim() || (a.organization||'');
+        const loc = formatLoc(a.location);
+        html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    if (Array.isArray(resp.inventors_data) && resp.inventors_data.length) {
+      html += `<h2>Inventors</h2><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
+      resp.inventors_data.forEach(i => {
+        const name = ((i.first_name||'') + ' ' + (i.last_name||'')).trim();
+        const loc = formatLoc(i.location);
+        html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    // applications (if top-level)
+    if (Array.isArray(resp.applications) && resp.applications.length) {
+      html += `<h2>Applications</h2><table><thead><tr><th>ID</th><th>Filing Date</th></tr></thead><tbody>`;
+      resp.applications.forEach(a => {
+        html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.patent_application_type||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    html += `</div>`;
+    resultsRoot.innerHTML = html;
+  }
+
+  function renderPatentItems(items, meta){
+    let html = '';
+    items.forEach(p => {
+      html += `<div class="result-card"><div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
+        <div class="muted" style="margin-top:6px">${escapeHtml(p.patent_date||'')} • ${escapeHtml(p.patent_type||'')}</div>`;
+
+      if (Array.isArray(p.applications) && p.applications.length) {
+        html += `<div class="sub"><strong>Applications</strong><table><thead><tr><th>Application ID</th><th>Filing Date</th></tr></thead><tbody>`;
+        p.applications.forEach(a=>{ html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>` });
+        html += `</tbody></table></div>`;
+      }
+
+      if (p.assignee) {
+        const name = ((p.assignee.first_name||'') + ' ' + (p.assignee.last_name||'')).trim() || p.assignee.organization || '';
+        const loc = formatLoc(p.assignee.location);
+        html += `<div class="sub"><strong>Assignee</strong><table><tbody><tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr></tbody></table></div>`;
+      }
+
+      if (Array.isArray(p.inventors) && p.inventors.length) {
+        html += `<div class="sub"><strong>Inventors</strong><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
+        p.inventors.forEach(inv=>{
+          const name = ((inv.first_name||'') + ' ' + (inv.last_name||'')).trim();
+          const loc = formatLoc(inv.location);
+          html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+
+      html += `</div>`;
+    });
+
+    html += buildPager(meta);
+    resultsRoot.innerHTML = html;
+  }
+
+  function renderEntityItems(items, meta){
+    // items are assignees or inventors containing patents array
+    let html = '';
+    items.forEach(ent => {
+      const title = ((ent.first_name||'') + ' ' + (ent.last_name||'')).trim() || ent.organization || '';
+      html += `<div class="result-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong style="color:#1565c0">${escapeHtml(title)}</strong></div></div>`;
+
+      if (ent.location) html += `<div class="muted" style="margin-top:8px">Location: ${escapeHtml(formatLoc(ent.location))}</div>`;
+
+      if (Array.isArray(ent.patents) && ent.patents.length) {
+        html += `<div style="margin-top:12px"><table><thead><tr><th>Patent Title</th><th>Patent ID</th><th>Date</th><th>Applications</th></tr></thead><tbody>`;
+        ent.patents.forEach(p=>{
+          const apps = (Array.isArray(p.applications) ? p.applications.map(a => `${a.application_id} (${a.patent_application_type||''})`).join(', ') : '');
+          html += `<tr><td>${escapeHtml(p.patent_title||'')}</td><td>${escapeHtml(p.patent_id||'')}</td><td>${escapeHtml(p.patent_date||'')}</td><td>${escapeHtml(apps)}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+
+      html += `</div>`;
+    });
+
+    html += buildPager(meta);
+    resultsRoot.innerHTML = html;
+  }
+
+  function renderGeneric(list, meta){
+    let html = '';
+    list.forEach(it => html += `<div class="result-card"><pre style="white-space:pre-wrap;margin:0">${escapeHtml(JSON.stringify(it,null,2))}</pre></div>`);
+    html += buildPager(meta);
+    resultsRoot.innerHTML = html;
+  }
+
+  function formatLoc(loc){ if (!loc) return ''; return [loc.city, loc.state, loc.country].filter(Boolean).join(', ') }
+
+  function buildPager(meta){
+    const page = Number(meta?.page ?? meta?.current_page ?? 1) || 1;
+    const total_pages = Number(meta?.total_page ?? meta?.total_pages ?? meta?.pages ?? null) || null;
+    const total_count = (meta?.total_count !== undefined ? meta.total_count : (meta?.total ?? null));
+
+    if (total_pages === null && total_count === null) return '';
+    const prevDisabled = page <= 1 ? 'disabled' : '';
+    const nextDisabled = total_pages ? (page >= total_pages ? 'disabled' : '') : '';
+
+    return `<div id="pagination-controls"><button ${prevDisabled} onclick="changePage(${page-1})">Prev</button><div class="pill">Page ${page}${total_pages ? ' of ' + total_pages : ''}${total_count !== null ? ' • ' + total_count + ' results' : ''}</div><button ${nextDisabled} onclick="changePage(${page+1})">Next</button></div>`;
+  }
+
+  window.changePage = function(newPage){
+    if (!Number.isFinite(newPage) || newPage < 1) return;
+    const fd = new FormData(form);
+    fd.set('page', String(newPage));
+    const body = new URLSearchParams(fd);
+    resultsRoot.innerHTML = '<div class="muted">Loading...</div>';
+    fetch(ENDPOINT, { method:'POST', body })
+      .then(r => r.json())
+      .then(renderResponse)
+      .catch(err => { console.error(err); resultsRoot.innerHTML = '<div class="message">Network or server error — check console</div>' });
+  }
+
+  function escapeHtml(s){ if (s === null || s === undefined) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>

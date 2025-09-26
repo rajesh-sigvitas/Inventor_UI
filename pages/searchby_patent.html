@@ -287,115 +287,202 @@ table td:nth-child(2) {
   <div>
     <button onclick="window.location.href='searchby_inventor.html'" class="glitter-btn">Search by Inventor</button>
     <button onclick="window.location.href='searchby_assignee.html'" class="glitter-btn">Search by Assignee</button>
+    <button onclick="window.location.href='allinone.html'" class="glitter-btn">All-in-One Search</button>
+
   </div>
 </div>
 
   <h1>Search Patent Details</h1>
 
-  <div class="search-box">
-    <input type="text" id="patentId" placeholder="Enter Patent ID">
-    <button onclick="searchPatent()">Search</button>
+<div class="search-box">
+  <input type="text" id="patentId" placeholder="Enter Patent ID">
+
+  <button onclick="searchPatent()" class="glitter-btn" style="margin-left:10px;">
+    Search
+  </button>
+
+  
+</div>
+
+
+
   </div>
+  <button id="downloadPdfBtn" class="glitter-btn"
+          style="display:none; margin-left:1200px; padding:8px 14px; font-size:16px;"
+          onclick="downloadPatentPdf()">
+    <i class="fas fa-download"></i>&nbsp;Download PDF
+  </button>
 
   <div class="result" id="result"></div>
+  
+
 
   <script>
-    async function searchPatent() {
-      const patentId = document.getElementById("patentId").value.trim();
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "";
+  // store current successfully-searched patent id
+  let currentPatentId = "";
 
-      if (!patentId) {
-        resultDiv.innerHTML = "<div class='message'>Please enter a Patent ID</div>";
+  // Hide download button whenever user edits the patent input
+  const patentInput = document.getElementById("patentId");
+  if (patentInput) {
+    patentInput.addEventListener("input", () => {
+      currentPatentId = "";
+      const btn = document.getElementById("downloadPdfBtn");
+      if (btn) btn.style.display = "none";
+    });
+  }
+
+  async function searchPatent() {
+    const patentId = document.getElementById("patentId").value.trim();
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
+    // hide download while searching / on empty input
+    const downloadBtn = document.getElementById("downloadPdfBtn");
+    if (downloadBtn) downloadBtn.style.display = "none";
+    currentPatentId = "";
+
+    if (!patentId) {
+      resultDiv.innerHTML = "<div class='message'>Please enter a Patent ID</div>";
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("patent_id", patentId);
+
+      const response = await fetch("http://127.0.0.1:8000/patents_view/search_by_patent", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.status === 0) {
+        resultDiv.innerHTML = `<div class='message'>${data.msg}</div>`;
         return;
       }
 
-      try {
-        const formData = new FormData();
-        formData.append("patent_id", patentId);
+      // Build & show the results (your existing rendering)
+      let html = `
+        <h2>Patent Information</h2>
+        <table>
+          <tr><th>Patent ID</th><td>${data.patent_data.patent_id}</td></tr>
+          <tr><th>Date</th><td>${data.patent_data.patent_date}</td></tr>
+          <tr><th>Title</th><td>${data.patent_data.patent_title}</td></tr>
+          <tr><th>Type</th><td>${data.patent_data.patent_type}</td></tr>
+        </table>
+      `;
 
-        const response = await fetch("http://127.0.0.1:8000/patents_view/search_by_patent", {
-          method: "POST",
-          body: formData
+      if (data.assignees_data && data.assignees_data.length > 0) {
+        const hasName = data.assignees_data.some(a => a.first_name || a.last_name);
+        html += `<h2>Assignees</h2><table><tr>`;
+        if (hasName) html += `<th>First Name</th><th>Last Name</th>`;
+        html += `<th>Organization</th><th>City</th><th>State</th><th>Country</th></tr>`;
+
+        data.assignees_data.forEach(a => {
+          html += `<tr>`;
+          if (hasName) html += `<td>${a.first_name || ""}</td><td>${a.last_name || ""}</td>`;
+          html += `
+            <td>${a.organization || ""}</td>
+            <td>${a.location?.city || ""}</td>
+            <td>${a.location?.state || ""}</td>
+            <td>${a.location?.country || ""}</td>
+          </tr>`;
         });
 
-        const data = await response.json();
-
-        if (data.status === 0) {
-          resultDiv.innerHTML = `<div class='message'>${data.msg}</div>`;
-          return;
-        }
-
-        // Patent Info
-        let html = `
-          <h2>Patent Information</h2>
-          <table>
-            <tr><th>Patent ID</th><td>${data.patent_data.patent_id}</td></tr>
-            <tr><th>Date</th><td>${data.patent_data.patent_date}</td></tr>
-            <tr><th>Title</th><td>${data.patent_data.patent_title}</td></tr>
-            <tr><th>Type</th><td>${data.patent_data.patent_type}</td></tr>
-          </table>
-        `;
-
-        // Assignee Info (no sequence)
-        if (data.assignees_data.length > 0) {
-          const hasName = data.assignees_data.some(a => a.first_name || a.last_name);
-
-          html += `<h2>Assignees</h2><table><tr>`;
-          if (hasName) {
-            html += `<th>First Name</th><th>Last Name</th>`;
-          }
-          html += `<th>Organization</th><th>City</th><th>State</th><th>Country</th></tr>`;
-
-          data.assignees_data.forEach(a => {
-            html += `<tr>`;
-            if (hasName) {
-              html += `<td>${a.first_name || ""}</td><td>${a.last_name || ""}</td>`;
-            }
-            html += `
-              <td>${a.organization || ""}</td>
-              <td>${a.location?.city || ""}</td>
-              <td>${a.location?.state || ""}</td>
-              <td>${a.location?.country || ""}</td>
-            </tr>`;
-          });
-
-          html += `</table>`;
-        }
-
-        // Inventor Info (no sequence)
-        if (data.inventors_data.length > 0) {
-          const hasName = data.inventors_data.some(inv => inv.first_name || inv.last_name);
-
-          html += `<h2>Inventors</h2><table><tr>`;
-          if (hasName) {
-            html += `<th>First Name</th><th>Last Name</th>`;
-          }
-          html += `<th>City</th><th>State</th><th>Country</th></tr>`;
-
-          data.inventors_data.forEach(inv => {
-            html += `<tr>`;
-            if (hasName) {
-              html += `<td>${inv.first_name || ""}</td><td>${inv.last_name || ""}</td>`;
-            }
-            html += `
-              <td>${inv.location?.city || ""}</td>
-              <td>${inv.location?.state || ""}</td>
-              <td>${inv.location?.country || ""}</td>
-            </tr>`;
-          });
-
-          html += `</table>`;
-        }
-
-        resultDiv.innerHTML = html;
-
-      } catch (err) {
-        resultDiv.innerHTML = "<div class='message'>Error fetching response</div>";
-        console.error(err);
+        html += `</table>`;
       }
+
+      if (data.inventors_data && data.inventors_data.length > 0) {
+        const hasName = data.inventors_data.some(inv => inv.first_name || inv.last_name);
+        html += `<h2>Inventors</h2><table><tr>`;
+        if (hasName) html += `<th>First Name</th><th>Last Name</th>`;
+        html += `<th>City</th><th>State</th><th>Country</th></tr>`;
+
+        data.inventors_data.forEach(inv => {
+          html += `<tr>`;
+          if (hasName) html += `<td>${inv.first_name || ""}</td><td>${inv.last_name || ""}</td>`;
+          html += `
+            <td>${inv.location?.city || ""}</td>
+            <td>${inv.location?.state || ""}</td>
+            <td>${inv.location?.country || ""}</td>
+          </tr>`;
+        });
+
+        html += `</table>`;
+      }
+
+      resultDiv.innerHTML = html;
+
+      // SEARCH SUCCESS — show the download button and store the patent id
+      currentPatentId = data.patent_data.patent_id;
+      if (downloadBtn) {
+        downloadBtn.style.display = "inline-block";
+      }
+
+    } catch (err) {
+      resultDiv.innerHTML = "<div class='message'>Error fetching response</div>";
+      console.error(err);
     }
-  </script>
+  }
+
+  async function downloadPatentPdf() {
+    const patentId = currentPatentId || document.getElementById("patentId")?.value?.trim();
+    if (!patentId) {
+      alert("No patent selected. Please search first.");
+      return;
+    }
+
+    const btn = document.getElementById("downloadPdfBtn");
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Preparing PDF...";
+
+    try {
+      const form = new FormData();
+      form.append("patent_id", patentId);
+
+      const res = await fetch("http://127.0.0.1:8000/patents_view/search_by_patent_pdf", {
+        method: "POST",
+        body: form,
+      });
+
+      if (!res.ok) {
+        let errMsg = "Failed to generate PDF.";
+        try {
+          const j = await res.json();
+          if (j && j.msg) errMsg = j.msg;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      let filename = `Patent_${patentId}.pdf`;
+      const disposition = res.headers.get("content-disposition");
+      if (disposition) {
+        const match = disposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/);
+        if (match) filename = decodeURIComponent(match[1] || match[2]);
+      }
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Download failed");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+</script>
+
 
 </body>
 </html>
