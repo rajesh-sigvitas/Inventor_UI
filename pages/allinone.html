@@ -354,6 +354,25 @@ table td:nth-child(2) {
     box-shadow: 0 0 16px rgba(0, 186, 242, 0.9);
   }
 }
+
+/* container for the download button */
+.download-btn-container {
+  /* margin-top: 1  0px; */
+  
+  display: flex;
+  justify-content: flex-end; /* aligns button to right */
+}
+
+/* style for the button itself */
+.download-btn {
+  padding: 6px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;        /* keeps icon and text inline nicely */
+  align-items: center;         /* vertically centers icon */
+  gap: 5px;                    /* space between icon and text */
+}
+
   </style>
 </head>
 <body>
@@ -362,18 +381,18 @@ table td:nth-child(2) {
 <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1200px; margin:0 auto 30px auto; padding:0 20px;">
 
   <!-- Back Button on far left -->
-  <!-- <button onclick="window.location.href='../index.html'" 
+  <button onclick="window.location.href='../index.html'" 
           class="glitter-btn home-btn">
           
     <i class="fas fa-home"></i> Home
-  </button> -->
+  </button>
 
   <!-- Right Buttons on far right -->
-  <!-- <div>
+  <div>
     <button onclick="window.location.href='searchby_patent.html'" class="glitter-btn">Search Patent Details</button>
     <button onclick="window.location.href='searchby_inventor.html'" class="glitter-btn">Search by Inventor</button>
     <button onclick="window.location.href='searchby_assignee.html'" class="glitter-btn">Search by Assignee</button>
-  </div> -->
+  </div>
 </div>
   <h1>All-in-One Patent Search</h1>
 
@@ -465,79 +484,95 @@ table td:nth-child(2) {
   }
 
   function renderPatentDetail(resp){
-    const p = resp.patent_data || {};
-    let html = `<div class="result-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>
-      <div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
-      <div class="muted" style="margin-top:6px">Type: ${escapeHtml(p.patent_type||'')} | Date: ${escapeHtml(p.patent_date||'')}</div>
-    </div></div>`;
+  const p = resp.patent_data || {};
+  let html = `<div class="result-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>
+    <div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
+    <div class="muted" style="margin-top:6px">Type: ${escapeHtml(p.patent_type||'')} | Date: ${escapeHtml(p.patent_date||'')}</div>
+  </div></div>`;
 
-    if (Array.isArray(resp.assignees_data) && resp.assignees_data.length) {
-      html += `<h2>Assignees</h2><table><thead><tr><th>Name / Organization</th><th>Location</th></tr></thead><tbody>`;
-      resp.assignees_data.forEach(a => {
-        const name = ((a.first_name||'') + ' ' + (a.last_name||'')).trim() || (a.organization||'');
-        const loc = formatLoc(a.location);
-        html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
-      });
-      html += `</tbody></table>`;
+  // --- Download Button ---
+  html += `
+  <div class="download-btn-container">
+    <button class="glitter-btn download-btn" onclick="downloadPatent('${escapeHtml(p.patent_id)}')">
+      <i class="fas fa-download"></i> Download PDF
+    </button>
+  </div>
+`;
+
+  if (Array.isArray(resp.assignees_data) && resp.assignees_data.length) {
+    html += `<h2>Assignees</h2><table><thead><tr><th>Name / Organization</th><th>Location</th></tr></thead><tbody>`;
+    resp.assignees_data.forEach(a => {
+      const name = ((a.first_name||'') + ' ' + (a.last_name||'')).trim() || (a.organization||'');
+      const loc = formatLoc(a.location);
+      html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  if (Array.isArray(resp.inventors_data) && resp.inventors_data.length) {
+    html += `<h2>Inventors</h2><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
+    resp.inventors_data.forEach(i => {
+      const name = ((i.first_name||'') + ' ' + (i.last_name||'')).trim();
+      const loc = formatLoc(i.location);
+      html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  if (Array.isArray(resp.applications) && resp.applications.length) {
+    html += `<h2>Applications</h2><table><thead><tr><th>ID</th><th>Filing Date</th></tr></thead><tbody>`;
+    resp.applications.forEach(a => {
+      html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.patent_application_type||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  html += `</div>`;
+  resultsRoot.innerHTML = html;
+}
+
+
+  function renderPatentItems(items, meta){
+  let html = '';
+  items.forEach(p => {
+    html += `<div class="result-card"><div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
+      <div class="muted" style="margin-top:6px">${escapeHtml(p.patent_date||'')} • ${escapeHtml(p.patent_type||'')}</div>`;
+
+    // --- Download Button ---
+  
+
+
+
+
+    if (Array.isArray(p.applications) && p.applications.length) {
+      html += `<div class="sub"><strong>Applications</strong><table><thead><tr><th>Application ID</th><th>Filing Date</th></tr></thead><tbody>`;
+      p.applications.forEach(a=>{ html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>` });
+      html += `</tbody></table></div>`;
     }
 
-    if (Array.isArray(resp.inventors_data) && resp.inventors_data.length) {
-      html += `<h2>Inventors</h2><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
-      resp.inventors_data.forEach(i => {
-        const name = ((i.first_name||'') + ' ' + (i.last_name||'')).trim();
-        const loc = formatLoc(i.location);
-        html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
-      });
-      html += `</tbody></table>`;
+    if (p.assignee) {
+      const name = ((p.assignee.first_name||'') + ' ' + (p.assignee.last_name||'')).trim() || p.assignee.organization || '';
+      const loc = formatLoc(p.assignee.location);
+      html += `<div class="sub"><strong>Assignee</strong><table><tbody><tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr></tbody></table></div>`;
     }
 
-    // applications (if top-level)
-    if (Array.isArray(resp.applications) && resp.applications.length) {
-      html += `<h2>Applications</h2><table><thead><tr><th>ID</th><th>Filing Date</th></tr></thead><tbody>`;
-      resp.applications.forEach(a => {
-        html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.patent_application_type||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>`;
+    if (Array.isArray(p.inventors) && p.inventors.length) {
+      html += `<div class="sub"><strong>Inventors</strong><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
+      p.inventors.forEach(inv=>{
+        const name = ((inv.first_name||'') + ' ' + (inv.last_name||'')).trim();
+        const loc = formatLoc(inv.location);
+        html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
       });
-      html += `</tbody></table>`;
+      html += `</tbody></table></div>`;
     }
 
     html += `</div>`;
-    resultsRoot.innerHTML = html;
-  }
+  });
 
-  function renderPatentItems(items, meta){
-    let html = '';
-    items.forEach(p => {
-      html += `<div class="result-card"><div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
-        <div class="muted" style="margin-top:6px">${escapeHtml(p.patent_date||'')} • ${escapeHtml(p.patent_type||'')}</div>`;
+  html += buildPager(meta);
+  resultsRoot.innerHTML = html;
+}
 
-      if (Array.isArray(p.applications) && p.applications.length) {
-        html += `<div class="sub"><strong>Applications</strong><table><thead><tr><th>Application ID</th><th>Filing Date</th></tr></thead><tbody>`;
-        p.applications.forEach(a=>{ html += `<tr><td>${escapeHtml(a.application_id||'')}</td><td>${escapeHtml(a.filing_date||'')}</td></tr>` });
-        html += `</tbody></table></div>`;
-      }
-
-      if (p.assignee) {
-        const name = ((p.assignee.first_name||'') + ' ' + (p.assignee.last_name||'')).trim() || p.assignee.organization || '';
-        const loc = formatLoc(p.assignee.location);
-        html += `<div class="sub"><strong>Assignee</strong><table><tbody><tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr></tbody></table></div>`;
-      }
-
-      if (Array.isArray(p.inventors) && p.inventors.length) {
-        html += `<div class="sub"><strong>Inventors</strong><table><thead><tr><th>Name</th><th>Location</th></tr></thead><tbody>`;
-        p.inventors.forEach(inv=>{
-          const name = ((inv.first_name||'') + ' ' + (inv.last_name||'')).trim();
-          const loc = formatLoc(inv.location);
-          html += `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(loc)}</td></tr>`;
-        });
-        html += `</tbody></table></div>`;
-      }
-
-      html += `</div>`;
-    });
-
-    html += buildPager(meta);
-    resultsRoot.innerHTML = html;
-  }
 
   function renderEntityItems(items, meta){
     // items are assignees or inventors containing patents array
@@ -598,6 +633,36 @@ table td:nth-child(2) {
   }
 
   function escapeHtml(s){ if (s === null || s === undefined) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  async function downloadPatent(patentId) {
+  if (!patentId) return alert('Patent ID not found');
+
+  try {
+    const form = new FormData();
+    form.append("patent_id", patentId);
+
+    const res = await fetch("http://127.0.0.1:8000/patents_view/search_by_patent_pdf", {
+      method: "POST",
+      body: form,
+    });
+
+    if (!res.ok) throw new Error('Network response was not ok');
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `patent_${patentId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to download patent PDF');
+  }
+}
+
+
 </script>
 </body>
 </html>
