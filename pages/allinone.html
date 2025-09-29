@@ -650,7 +650,7 @@ table td:nth-child(2) {
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
+    link.href = url; 
     link.download = `patent_${patentId}.pdf`;
     document.body.appendChild(link);
     link.click();
