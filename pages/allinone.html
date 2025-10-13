@@ -602,8 +602,8 @@ table td:nth-child(2) {
   function renderGeneric(list, meta){
     let html = '';
     list.forEach(it => html += `<div class="result-card"><pre style="white-space:pre-wrap;margin:0">${escapeHtml(JSON.stringify(it,null,2))}</pre></div>`);
-    html += buildPager(meta);
-    resultsRoot.innerHTML = html;
+    html += buildPager(meta);  
+    resultsRoot.innerHTML = html; 
   }
 
   function formatLoc(loc){ if (!loc) return ''; return [loc.city, loc.state, loc.country].filter(Boolean).join(', ') }
