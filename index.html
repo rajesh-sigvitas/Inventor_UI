@@ -1,149 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Home - Patent Explorer</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ==== Global Reset ==== */
-    * {margin:0; padding:0; box-sizing:border-box;}
-    body {font-family:'Montserrat', sans-serif; background: linear-gradient(135deg, #e3f2fd, #f1f8ff); color:#333; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;}
-    a {text-decoration:none; color:inherit;}
-
-    /* ==== Header ==== */
-    header {width:100%; padding:40px 20px; text-align:center;}
-    header h1 {font-size:3rem; color:#1565c0; text-shadow: 2px 2px 10px rgba(0,0,0,0.1);}
-    header p {font-size:1.2rem; margin-top:10px; color:#0d47a1;}
-
-    /* ==== Container for cards ==== */
-    .cards-container {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap:30px;
-      width:90%;
-      max-width:1200px;
-      margin-top:60px;
-    }
-
-    /* ==== Individual Card ==== */
-    .card {
-      background: linear-gradient(145deg, #ffffff, #bbdefb);
-      border-radius:20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-      padding:40px 30px;
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f1f8ff);
+      color:#333;
+      min-height:100vh;
       display:flex;
       flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      align-items:stretch; /* allow full-width centered container */
+      justify-content:flex-start;
+      padding: 20px 0;
+    }
+    a { text-decoration:none; color:inherit; }
+
+    /* ==== Header ==== */
+    header {
+      width:100%;
+      padding:40px 20px;
       text-align:center;
-      transition: all 0.4s ease-in-out;
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
+      max-width:1200px;
+      margin: 0 auto;
     }
+    header h1 { font-size:3rem; color:#1565c0; text-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+    header p { font-size:1.2rem; margin-top:10px; color:#0d47a1; }
 
-    .card:hover {
-      transform: translateY(-10px) scale(1.03);
-      box-shadow: 0 25px 60px rgba(0,0,0,0.15);
-    }
+    /* ==== Container for cards ==== */
+    /* make anchors block-level grid items and remove tap highlight */
+/* Cards grid: fixed card width columns, centered */
+.cards-container {
+  display: grid;
+  /* Four columns each up to 320px wide; extra space stays as margin on left/right */
+  grid-template-columns: repeat(4, minmax(280px, 1fr));
+  gap: 30px;
+  justify-content: center;      /* center the whole grid in the page */
+  align-items: start;
+  width: 100%;
+  max-width: 1400px;            /* keeps the grid from spanning the whole viewport */
+  margin: 40px auto;            /* center container horizontally */
+  padding: 0 20px;
+}
 
-    .card::before {
-      content:"";
-      position:absolute;
-      top:0; left:0;
-      width:100%; height:100%;
-      background: radial-gradient(circle at top right, rgba(21,101,192,0.2), transparent 70%);
-      opacity:0;
-      transition:opacity 0.5s;
-    }
-    .card:hover::before {opacity:1;}
+/* Make anchors behave as full grid items */
+.cards-container > a {
+  display: block;
+  text-decoration: none;
+}
 
-    .card img {
-      width:80px;
-      height:80px;
-      margin-bottom:20px;
-    }
+/* Individual card size and safety */
+.card {
+  width: 100%;                  /* will be bounded by the 320px grid cell */
+  max-width: 320px;             /* ensure card never grows beyond column */
+  height: 100%;
+  padding: 30px 24px;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  background: linear-gradient(145deg, #fff, #bbdefb);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  transition: transform .18s ease, box-shadow .18s ease, opacity .12s linear;
+  overflow: hidden;
+  will-change: transform, box-shadow, opacity;
+  transform: translateZ(0);
+}
 
-    .card h2 {
-      font-size:1.8rem;
-      color:#0d47a1;
-      margin-bottom:10px;
-    }
+/* Hover/active — keep subtle to avoid layout shifts */
+.card:hover { transform: translateY(-8px) scale(1.02); }
+.card:active { transform: translateY(-6px) scale(1.01); }
 
-    .card p {
-      font-size:1rem;
-      color:#1565c0;
-      line-height:1.5;
-      margin-bottom:20px;
-    }
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  .cards-container { grid-template-columns: repeat(3, minmax(0, 320px)); }
+}
+@media (max-width: 920px) {
+  .cards-container { grid-template-columns: repeat(2, minmax(0, 320px)); }
+}
+@media (max-width: 600px) {
+  .cards-container { grid-template-columns: 1fr; }
+  .card { max-width: 100%; padding: 22px; }
+}
 
-    .card button {
-      background: #1976d2;
-      color:#fff;
-      border:none;
-      padding:12px 25px;
-      border-radius:50px;
-      font-size:1rem;
-      font-weight:600;
-      cursor:pointer;
-      transition: background 0.3s, transform 0.3s;
-    }
 
-    .card button:hover {
-      background:#0d47a1;
-      transform: scale(1.05);
-    }
+/* pressed look (subtle) — shorter transform and faster transition to avoid jumpiness */
+.card:active {
+  transform: translateY(-6px) scale(1.015);
+  transition-duration: 120ms;
+}
+
+/* keep the hover effect but make it milder for click stability */
+.card:hover {
+  transform: translateY(-8px) scale(1.025);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+}
+
+/* accessible focus ring instead of removing outline */
+.card:focus,
+.card:focus-visible {
+  outline: 3px solid rgba(13,71,161,0.14);
+  outline-offset: 6px;
+}
+
+/* prevent image dragging (helps with mobile tapping) */
+.card img { -webkit-user-drag: none; user-drag: none; }
+
+/* replace button styling with a non-interactive styled element inside anchor */
+.cta {
+  display:inline-block;
+  padding:10px 22px;
+  border-radius:50px;
+  font-size:1rem;
+  font-weight:600;
+  background:#1976d2;
+  color:#fff;
+  cursor:pointer; /* visual affordance */
+  margin-top:8px;
+  text-align:center;
+  pointer-events: none; /* IMPORTANT: keep the anchor handling clicks, not the span */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* if you want keyboard activation for .cta while maintaining anchor click, keep it passive;
+   user will click the anchor (tab/enter on the anchor will still work) */
+
 
     /* ==== Footer ==== */
     footer {
-  margin-top: 150px;
-  padding: 30px 20px;
-  text-align: center;
-  font-size: 1rem;
-  color:#0d47a1;
-  /* color: #ffffff; */
-  /* background: linear-gradient(135deg, #0d47a1, #1976d2); */
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  /* box-shadow: 0 -4px 10px rgba(0,0,0,0.2); */
-  transition: background 0.3s ease;
-}
+      margin-top: 60px;
+      padding: 30px 20px;
+      text-align: center;
+      font-size: 1rem;
+      color:#0d47a1;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      transition: background 0.3s ease;
+    }
+    footer .team {
+      font-weight: bold;
+      text-decoration: none;
+      background: linear-gradient(90deg, #FFD700, #FFFACD, #FFD700, #FFA500, #FFD700);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glitterGold 2s linear infinite;
+      transition: all 0.3s ease;
+    }
+    @keyframes glitterGold {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-footer .team {
-  font-weight: bold;
-  text-decoration: none;
-  background: linear-gradient(90deg, #FFD700, #FFFACD, #FFD700, #FFA500, #FFD700);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: glitterGold 2s linear infinite;
-  transition: all 0.3s ease;
-}
+    /* ==== Responsive breakpoints ==== */
+    /* 3 columns for medium-wide screens */
+    @media (max-width:1200px) {
+      .cards-container { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
 
+    /* 2 columns for tablets */
+    @media (max-width:900px) {
+      .cards-container { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      header h1 { font-size:2.4rem; }
+    }
 
-/* Gold glitter animation */
-@keyframes glitterGold {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Silver glitter animation */
-@keyframes glitterSilver {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-footer p {
-  margin: 0;
-}
-
-
-    /* ==== Responsive ==== */
-    @media(max-width:600px){
-      header h1 {font-size:2.2rem;}
-      .card {padding:30px 20px;}
+    /* 1 column for mobile */
+    @media (max-width:600px) {
+      .cards-container { grid-template-columns: repeat(1, minmax(0,1fr)); gap:20px; }
+      header h1 { font-size:2.2rem; }
+      .card { padding:22px; }
     }
   </style>
 </head>
@@ -156,17 +189,10 @@ footer p {
   <div class="cards-container">
     <a href="pages/searchby_patent.html">
       <div class="card">
-        
         <img src="https://img.icons8.com/ios-filled/100/1565c0/certificate.png" alt="Patent Certificate">
-        
-
-
-
-
-
         <h2>Search Patent Data</h2>
         <p>Explore patents, applications, and detailed information in one place.</p>
-        <button>Go to Patents</button>
+        <span class="cta" role="button" tabindex="0">Go to Patents</span>
       </div>
     </a>
 
@@ -175,7 +201,7 @@ footer p {
         <img src="https://img.icons8.com/ios-filled/100/1565c0/idea.png" alt="Inventor">
         <h2>Search Inventors</h2>
         <p>Discover inventors, view patents, and explore their contributions.</p>
-        <button>Go to Inventors</button>
+        <span class="cta" role="button" tabindex="0">Go to Inventors</span>
       </div>
     </a>
 
@@ -184,15 +210,22 @@ footer p {
         <img src="https://img.icons8.com/ios-filled/100/1565c0/company.png" alt="Assignee">
         <h2>Search Assignees</h2>
         <p>Find assignees, explore patents, applications, and their locations.</p>
-        <button>Go to Assignees</button>
+        <span class="cta" role="button" tabindex="0">Go to Assignees</span>
+      </div>
+    </a>
+
+    <a href="pages/allinone.html">
+      <div class="card">
+        <img src="https://img.icons8.com/ios-filled/100/1565c0/search.png" alt="All in One">
+        <h2>All-in-One Search</h2>
+        <p>Search patents, inventors, and assignees together</p>
+        <span class="cta" role="button" tabindex="0">All in One Search</span>
       </div>
     </a>
   </div>
-<footer>
-  <p>
-    &copy; 2025 Patent Explorer. Crafted with ❤️ by <p class="team">Team Sigvitas</p>
-  </p>
-</footer>
 
+  <footer>
+    <p>&copy; 2025 Patent Explorer. Crafted by <span class="team">Team Sigvitas</span></p>
+  </footer>
 </body>
 </html>

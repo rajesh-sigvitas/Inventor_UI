@@ -584,7 +584,7 @@ table td:nth-child(2) {
       if (ent.location) html += `<div class="muted" style="margin-top:8px">Location: ${escapeHtml(formatLoc(ent.location))}</div>`;
 
       if (Array.isArray(ent.patents) && ent.patents.length) {
-        html += `<div style="margin-top:12px"><table><thead><tr><th>Patent Title</th><th>Patent ID</th><th>Date</th><th>Applications</th></tr></thead><tbody>`;
+        html += `<div style="margin-top:12px"><table><thead><tr><th>Patent Title</th><th>Patent Number</th><th>Date</th><th>Applications</th></tr></thead><tbody>`;
         ent.patents.forEach(p=>{
           const apps = (Array.isArray(p.applications) ? p.applications.map(a => `${a.application_id} (${a.patent_application_type||''})`).join(', ') : '');
           html += `<tr><td>${escapeHtml(p.patent_title||'')}</td><td>${escapeHtml(p.patent_id||'')}</td><td>${escapeHtml(p.patent_date||'')}</td><td>${escapeHtml(apps)}</td></tr>`;
