@@ -84,7 +84,7 @@
     }
 
     .result {
-      max-width: 1000px;
+      max-width: 1800px;
       margin: 20px auto;
       padding: 20px;
       background: #ffffff;
@@ -259,7 +259,7 @@ table td:nth-child(2) {
   color: #0039a6;
 }
 
-/* Glow effect for Patent ID and Title */
+/* Glow effect for Patent Number and Title */
 .glow-text {
   font-size: 18px;
   font-style: italic;
@@ -399,7 +399,7 @@ table td:nth-child(2) {
   <div class="search-box">
     <form id="searchForm">
       <div class="form-row">
-        <input id="patent_id" name="patent_id" type="text" placeholder="Patent ID">
+        <input id="patent_id" name="patent_id" type="text" placeholder="Patent Number">
         <input id="first_name" name="first_name" type="text" placeholder="Inventor First Name">
         <input id="last_name" name="last_name" type="text" placeholder="Inventor Last Name">
         <input id="organization_name" name="organization_name" type="text" placeholder="Organization Name">
@@ -634,7 +634,7 @@ table td:nth-child(2) {
 
   function escapeHtml(s){ if (s === null || s === undefined) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   async function downloadPatent(patentId) {
-  if (!patentId) return alert('Patent ID not found');
+  if (!patentId) return alert('Patent Number not found');
 
   try {
     const form = new FormData();
