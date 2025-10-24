@@ -332,6 +332,17 @@ table td:nth-child(2) {
   box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
   animation: pulseGlow 2s infinite alternate;
 }
+#count-re{
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  width: 210px;
+  box-shadow: 0 0 6px rgba(0, 186, 242, 0.4);
+  animation: pulseGlow 2s infinite alternate;
+
+}
 
 /* Fade-in animation */
 @keyframes fadeInUp {
@@ -373,7 +384,8 @@ table td:nth-child(2) {
   gap: 5px;                    /* space between icon and text */
 }
 
-  </style>
+
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -444,6 +456,19 @@ table td:nth-child(2) {
       resultsRoot.innerHTML = '<div class="message">Network or server error — check console</div>';
     }
   });
+  
+    // show total count at top of results (uses meta.total_count or meta.total)
+  function buildTopSummary(meta){
+    const total = meta?.total_count ?? meta?.total ?? null;
+    if (total === null || total === undefined) return '';
+    // optionally show page info if available
+    const page = Number(meta?.page ?? meta?.current_page ?? 1) || 1;
+    const totalPages = Number(meta?.total_page ?? meta?.total_pages ?? meta?.pages ?? null) || null;
+    const pageText = totalPages ? ` • Page ${page} of ${totalPages}` : ` • Page ${page}`;
+    return `<div id="count-re" style="margin-bottom:12px; font-weight:700; color:#1565c0; font-size:15px">
+          Total results found: ${escapeHtml(String(total))}
+        </div>`;
+}
 
   // Render logic: handle single patent response (patent_data + assignees_data + inventors_data)
   // handle paginated responses (items) and entity lists (items with patents array)
@@ -533,7 +558,7 @@ table td:nth-child(2) {
 
 
   function renderPatentItems(items, meta){
-  let html = '';
+  let html = buildTopSummary(meta);
   items.forEach(p => {
     html += `<div class="result-card"><div class="glow-text">${escapeHtml(p.patent_title||'Untitled')} <span style="font-size:14px;color:#1565c0">(${escapeHtml(p.patent_id||'')})</span></div>
       <div class="muted" style="margin-top:6px">${escapeHtml(p.patent_date||'')} • ${escapeHtml(p.patent_type||'')}</div>`;
@@ -576,7 +601,7 @@ table td:nth-child(2) {
 
   function renderEntityItems(items, meta){
     // items are assignees or inventors containing patents array
-    let html = '';
+    let html = buildTopSummary(meta);
     items.forEach(ent => {
       const title = ((ent.first_name||'') + ' ' + (ent.last_name||'')).trim() || ent.organization || '';
       html += `<div class="result-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong style="color:#1565c0">${escapeHtml(title)}</strong></div></div>`;
@@ -600,7 +625,7 @@ table td:nth-child(2) {
   }
 
   function renderGeneric(list, meta){
-    let html = '';
+    let html = buildTopSummary(meta);
     list.forEach(it => html += `<div class="result-card"><pre style="white-space:pre-wrap;margin:0">${escapeHtml(JSON.stringify(it,null,2))}</pre></div>`);
     html += buildPager(meta);  
     resultsRoot.innerHTML = html; 
@@ -617,7 +642,7 @@ table td:nth-child(2) {
     const prevDisabled = page <= 1 ? 'disabled' : '';
     const nextDisabled = total_pages ? (page >= total_pages ? 'disabled' : '') : '';
 
-    return `<div id="pagination-controls"><button ${prevDisabled} onclick="changePage(${page-1})">Prev</button><div class="pill">Page ${page}${total_pages ? ' of ' + total_pages : ''}${total_count !== null ? ' • ' + total_count + ' results' : ''}</div><button ${nextDisabled} onclick="changePage(${page+1})">Next</button></div>`;
+    return `<div id="pagination-controls"><button ${prevDisabled} onclick="changePage(${page-1})">Prev</button><div class="pill">Page ${page}${total_pages ? ' of ' + total_pages : ''}</div><button ${nextDisabled} onclick="changePage(${page+1})">Next</button></div>`;
   }
 
   window.changePage = function(newPage){
